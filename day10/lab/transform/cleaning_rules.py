@@ -20,6 +20,7 @@ ALLOWED_DOC_IDS = frozenset(
         "sla_p1_2026",
         "it_helpdesk_faq",
         "hr_leave_policy",
+        "access_control_sop",
     }
 )
 
@@ -110,6 +111,10 @@ def clean_rows(
                 }
             )
             continue
+            
+        if doc_id == "hr_leave_policy" and "10 ngày phép năm" in text:
+            quarantine.append({**raw, "reason": "stale_hr_policy_content"})
+            continue
 
         if not text:
             quarantine.append({**raw, "reason": "missing_chunk_text"})
@@ -121,7 +126,21 @@ def clean_rows(
             continue
         seen_text.add(key)
 
+        # Rule 1: Quarantine bản sync cũ
+        if "Ghi chú: bản sync cũ" in text:
+            quarantine.append({**raw, "reason": "stale_sync_data"})
+            continue
+
         fixed_text = text
+        
+        # Rule 2: Xóa tiền tố "Nội dung không rõ ràng: "
+        if fixed_text.startswith("Nội dung không rõ ràng: "):
+            fixed_text = fixed_text.replace("Nội dung không rõ ràng: ", "").strip()
+            
+        # Rule 3: Xóa ký tự "!!!" rác
+        if "!!!" in fixed_text:
+            fixed_text = fixed_text.replace("!!!", "")
+
         if apply_refund_window_fix and doc_id == "policy_refund_v4":
             if "14 ngày làm việc" in fixed_text:
                 fixed_text = fixed_text.replace(

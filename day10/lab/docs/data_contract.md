@@ -8,7 +8,9 @@
 
 | Nguồn | Phương thức ingest | Failure mode chính | Metric / alert |
 |-------|-------------------|-------------------|----------------|
-| … | … | … | … |
+| `policy_refund_v4` | Export CSV định kỳ | Có chứa dữ liệu cũ (14 ngày) | Số lượng bản ghi bị dính stale data |
+| `access_control_sop` | Export CSV định kỳ | Bị thiếu doc_id trong quá trình ingest | Số lượng bản ghi bị loại (quarantine) do unknown doc_id |
+| `hr_leave_policy` | Export CSV định kỳ | Có bản HR cũ năm 2025 (xung đột version) | Số bản ghi có hiệu lực trước năm 2026 |
 
 ---
 

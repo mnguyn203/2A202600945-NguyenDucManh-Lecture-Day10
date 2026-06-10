@@ -112,5 +112,33 @@ def run_expectations(cleaned_rows: List[Dict[str, Any]]) -> Tuple[List[Expectati
         )
     )
 
+    # E7: Không có chunk nào bắt đầu bằng "Nội dung không rõ ràng: "
+    bad_prefix = [
+        r for r in cleaned_rows if (r.get("chunk_text") or "").startswith("Nội dung không rõ ràng: ")
+    ]
+    ok7 = len(bad_prefix) == 0
+    results.append(
+        ExpectationResult(
+            "no_unclear_prefix",
+            ok7,
+            "halt",
+            f"violations={len(bad_prefix)}",
+        )
+    )
+
+    # E8: Không có chunk nào chứa "!!!"
+    bad_spam = [
+        r for r in cleaned_rows if "!!!" in (r.get("chunk_text") or "")
+    ]
+    ok8 = len(bad_spam) == 0
+    results.append(
+        ExpectationResult(
+            "no_exclamation_spam",
+            ok8,
+            "halt",
+            f"violations={len(bad_spam)}",
+        )
+    )
+
     halt = any(not r.passed and r.severity == "halt" for r in results)
     return results, halt
